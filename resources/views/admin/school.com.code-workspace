@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../../../../school.com"
+		},
+		{
+			"path": "../../../../../../Users/rrvqt/Downloads/Compressed/AdminLTE-v3.2.0-master/AdminLTE-v3.2.0-master"
+		},
+		{
+			"path": "../../.."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "AdminLTE-v3.2.0-master"
+	}
+}

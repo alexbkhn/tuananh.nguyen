@@ -8,8 +8,6 @@ use App\Http\Controllers\NavHistoryController;
 use App\Http\Controllers\StockCompanyController;
 use App\Http\Controllers\StockKeepingController;
 use App\Http\Controllers\ChartController;
-use App\Http\Controllers\TestStockHistoryController;
-use App\Http\Controllers\TestStockKeepingController;
 use App\Http\Controllers\NoteToDoController;
 use App\Http\Controllers\NavSavingsController;
 
@@ -88,17 +86,6 @@ Route::get('/line-chart', function () {
     return view('line-chart');
 });
 
-//Lịch sử giao dịch mua bán test
-Route::get('admin/test_stock_history/list', [TestStockHistoryController::class, 'getStockHistory']);
-Route::post('admin/test_stock_history/list', [TestStockHistoryController::class, 'insert']);
-Route::get('admin/test_stock_history/edit/{id}', [TestStockHistoryController::class, 'edit']);
-Route::post('admin/test_stock_history/edit/{id}', [TestStockHistoryController::class, 'update']);
-Route::get('admin/test_stock_history/delete/{id}', [TestStockHistoryController::class, 'delete']);
-
-
-// Danh mục nắm giữ test
-Route::get('admin/test_stock_keeping/list', [TestStockKeepingController::class, 'getStockKeeping']);
-Route::post('admin/test_stock_keeping/list', [TestStockKeepingController::class, 'insert']);
 
 // Công việc
 Route::get('admin/note_to_do/list', [NoteToDoController::class, 'getNoteToDo']);

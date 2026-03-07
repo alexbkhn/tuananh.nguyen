@@ -9,7 +9,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Mã chứng khoán tăng giá 3 ngày liên tiếp trong 10 ngày</h1>
+            <h1>Mã chứng khoán tăng giá 3 ngày liên tiếp trong 3 ngày gần nhất</h1>
           </div>
         </div>
       </div>
@@ -107,7 +107,7 @@ $(document).ready(function() {
 
     function loadCharts(stockCode) {
         $.ajax({
-            url: '{{ url("admin/stock_increasing/data") }}/' + stockCode,
+            url: '{{ url("admin/stock_increasing_3days/data") }}/' + stockCode,
             type: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -305,7 +305,8 @@ $(document).ready(function() {
         const url = URL.createObjectURL(blob);
         
         link.setAttribute('href', url);
-        link.setAttribute('download', 'CP_tang_3in10d_' + new Date().getTime() + '.csv');
+        const now = new Date().toISOString().slice(0, 19).replace('T', '_').replace(/:/g, '-');
+        link.setAttribute('download', 'CP_tang_3d_' + now + '.csv');
         link.style.visibility = 'hidden';
         
         document.body.appendChild(link);

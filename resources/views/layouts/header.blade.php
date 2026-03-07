@@ -233,9 +233,15 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{{ url('admin/stock_ceiling_3days/list') }}" class="nav-link">
+                <a href="{{ url('admin/stock_ceiling_2days/list') }}" class="nav-link">
                   <i class="fa fa-address-card nav-icon"></i>
-                  <p>CP tăng trần 3d</p>
+                  <p>CP tăng trần 2d</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ url('admin/stock_highest_2days/list') }}" class="nav-link">
+                  <i class="fa fa-address-card nav-icon"></i>
+                  <p>CP tăng cao 2d</p>
                 </a>
               </li>
               <li class="nav-item">

@@ -10,6 +10,7 @@ use App\Http\Controllers\StockKeepingController;
 use App\Http\Controllers\ChartController;
 use App\Http\Controllers\NoteToDoController;
 use App\Http\Controllers\NavSavingsController;
+use App\Http\Controllers\DashboardController;
 
 
 // Route::get('/', function () {
@@ -23,9 +24,7 @@ Route::get('logout', [AuthController::class, 'logout']);
 Route::get('forgot-password', [AuthController::class, 'forgotpassword']);
 Route::post('forgot-password', [AuthController::class, 'PostForgotPassword']);
 
-Route::get('admin/dashboard', function () {
-    return view('admin.dashboard');
-});
+Route::get('admin/dashboard', [DashboardController::class, 'index']);
 
 // Route::get('admin/admin/list', function () {
 //     return view('admin.admin.list');

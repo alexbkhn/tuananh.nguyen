@@ -9,7 +9,9 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Mã chứng khoán tăng giá 3 ngày liên tiếp trong 10 ngày</h1>
+            <h1>CP tăng cao 2 ngày liên tiếp gần nhất
+              <i id="infoIcon" class="fas fa-info-circle text-info ml-2" style="cursor:pointer;" data-toggle="modal" data-target="#infoModal"></i>
+            </h1>
           </div>
         </div>
       </div>
@@ -60,6 +62,7 @@
                     <i class="fas fa-download"></i> Export CSV
                   </button>
                 </div>
+
                 <!-- Scrollable table -->
                 <div style="max-height: 400px; overflow-y: auto;">
                   <table class="table table-bordered table-striped">
@@ -85,6 +88,30 @@
     </section>
 </div>
 
+<!-- Info modal -->
+<div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="infoModalLabel">Điều kiện lọc</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="font-size:0.9em;">
+        <strong>Note:</strong> Danh sách chỉ bao gồm mã có 2 phiên gần nhất<br>
+        - phiên sau có giá đóng tăng so với phiên trước.<br>
+        - mỗi phiên có khối lượng > 1.000.<br>
+        - hai phiên là hai ngày liền kề (chênh lệch không quá 1 ngày).<br>
+        - phiên gần nhất trong vòng 3 ngày qua.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @section('scripts')
@@ -95,6 +122,8 @@ $(document).ready(function() {
     // Load chart for first stock
     if ($('.stock-link').length > 0) {
         const firstStock = $('.stock-link').first().data('stock');
+        // Highlight first stock
+        $('.stock-link').first().closest('.stock-row').addClass('font-weight-bold');
         loadCharts(firstStock);
     }
 
@@ -102,12 +131,19 @@ $(document).ready(function() {
     $('.stock-link').on('click', function(e) {
         e.preventDefault();
         const stockCode = $(this).data('stock');
+        
+        // Remove active class from all rows
+        $('.stock-row').removeClass('font-weight-bold');
+        
+        // Add active class to clicked row
+        $(this).closest('.stock-row').addClass('font-weight-bold');
+        
         loadCharts(stockCode);
     });
 
     function loadCharts(stockCode) {
         $.ajax({
-            url: '{{ url("admin/stock_increasing/data") }}/' + stockCode,
+            url: '{{ url("admin/stock_highest_2days/data") }}/' + stockCode,
             type: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -305,7 +341,8 @@ $(document).ready(function() {
         const url = URL.createObjectURL(blob);
         
         link.setAttribute('href', url);
-        link.setAttribute('download', 'CP_tang_3in10d_' + new Date().getTime() + '.csv');
+        const now = new Date().toISOString().slice(0, 19).replace('T', '_').replace(/:/g, '-');
+        link.setAttribute('download', 'CP_tang_cao_2d_' + now + '.csv');
         link.style.visibility = 'hidden';
         
         document.body.appendChild(link);

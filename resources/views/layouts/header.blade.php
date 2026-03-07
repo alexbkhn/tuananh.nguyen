@@ -222,8 +222,32 @@
               </li>
               <li class="nav-item">
                 <a href="{{ url('admin/stock_increasing/list') }}" class="nav-link">
-                  <i class="fa fa-arrow-trending-up nav-icon"></i>
-                  <p>Mã tăng giá 3 ngày</p>
+                  <i class="fa fa-address-card nav-icon"></i>
+                  <p>CP tăng 3in10d</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ url('admin/stock_increasing_3days/list') }}" class="nav-link">
+                  <i class="fa fa-address-card nav-icon"></i>
+                  <p>CP tăng 3d</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ url('admin/stock_ceiling_2days/list') }}" class="nav-link">
+                  <i class="fa fa-address-card nav-icon"></i>
+                  <p>CP tăng trần 2d</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ url('admin/stock_highest_2days/list') }}" class="nav-link">
+                  <i class="fa fa-address-card nav-icon"></i>
+                  <p>CP tăng cao 2d</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ url('admin/stock_ceiling_highest_3days/list') }}" class="nav-link">
+                  <i class="fa fa-address-card nav-icon"></i>
+                  <p>CP tăng cao 3d</p>
                 </a>
               </li>
             </ul>
@@ -306,3 +330,99 @@
     </div>
     <!-- /.sidebar -->
   </aside>
+
+  <script>
+    // Sidebar state persistence - must run after page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebarKey = 'adminSidebarMenuState';
+      
+      // Delay slightly to ensure AdminLTE is initialized
+      setTimeout(function() {
+        restoreSidebarState();
+        setCurrentMenuActive();
+        setupMenuListeners();
+      }, 500);
+      
+      function setupMenuListeners() {
+        // Listen to AdminLTE treeview events
+        $(document).on('expanded.lte.treeview', function(e) {
+          saveSidebarState();
+        }).on('collapsed.lte.treeview', function(e) {
+          saveSidebarState();
+        });
+      }
+      
+      function saveSidebarState() {
+        const state = {};
+        
+        // Get all top-level menu items with submenus
+        $('.nav-sidebar > .nav-item > .nav-link').each(function() {
+          const $parent = $(this).parent('.nav-item');
+          const menuText = $(this).find('> p').first().text().trim();
+          
+          if (menuText && $parent.find('> .nav-treeview').length > 0) {
+            state[menuText] = $parent.hasClass('menu-open');
+          }
+        });
+        
+        localStorage.setItem(sidebarKey, JSON.stringify(state));
+        console.log('Sidebar state saved:', state);
+      }
+      
+      function restoreSidebarState() {
+        const savedState = localStorage.getItem(sidebarKey);
+        console.log('Restoring sidebar state:', savedState);
+        
+        if (savedState) {
+          try {
+            const state = JSON.parse(savedState);
+            
+            $('.nav-sidebar > .nav-item > .nav-link').each(function() {
+              const $parent = $(this).parent('.nav-item');
+              const menuText = $(this).find('> p').first().text().trim();
+              const $submenu = $parent.find('> .nav-treeview');
+              
+              if (menuText && $submenu.length > 0) {
+                if (state[menuText]) {
+                  // Menu should be open
+                  $parent.addClass('menu-open');
+                  $submenu.css('display', 'block');
+                } else {
+                  // Menu should be closed
+                  $parent.removeClass('menu-open');
+                  $submenu.css('display', 'none');
+                }
+              }
+            });
+          } catch (e) {
+            console.error('Error restoring sidebar state:', e);
+          }
+        }
+      }
+      
+      function setCurrentMenuActive() {
+        const currentPath = window.location.pathname;
+        console.log('Current path:', currentPath);
+        
+        // Mark current page link as active
+        $('.nav-sidebar .nav-link[href]').each(function() {
+          const href = $(this).attr('href');
+          const hrefPath = href.substring(href.indexOf('admin'));
+          const currentPagePath = currentPath.substring(currentPath.indexOf('admin'));
+          
+          if (hrefPath && currentPagePath.includes(hrefPath)) {
+            console.log('Found active link:', href);
+            $(this).addClass('active');
+            
+            // Open parent menu
+            const $parentTreeview = $(this).closest('.nav-treeview');
+            if ($parentTreeview.length > 0) {
+              const $parentItem = $parentTreeview.parent('.nav-item');
+              $parentItem.addClass('menu-open');
+              $parentTreeview.css('display', 'block');
+            }
+          }
+        });
+      }
+    });
+  </script>

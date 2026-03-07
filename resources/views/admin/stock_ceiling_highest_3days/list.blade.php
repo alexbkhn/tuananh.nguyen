@@ -9,7 +9,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>CP tăng cao 3 ngày liên tiếp gần nhất</h1>
+            <h1>Cây nến tăng giới hạn cao nhất 3 ngày - 90 ngày gần nhất</h1>
           </div>
         </div>
       </div>
@@ -23,10 +23,10 @@
           <div class="col-md-8">
             <div class="card card-primary">
               <div class="card-header">
-                <h3 class="card-title">Biểu đồ giá</h3>
+                <h3 class="card-title">Biểu đồ giá nến - 90 ngày gần nhất</h3>
               </div>
-              <div class="card-body" style="padding: 10px;">
-                <div style="position: relative; height: 350px; width: 100%;">
+              <div class="card-body" style="padding: 5px;">
+                <div style="position: relative; height: 400px; width: 100%;">
                   <canvas id="priceChart"></canvas>
                 </div>
               </div>
@@ -35,8 +35,8 @@
               <div class="card-header">
                 <h3 class="card-title">Khối lượng giao dịch</h3>
               </div>
-              <div class="card-body" style="padding: 10px;">
-                <div style="position: relative; height: 150px; width: 100%;">
+              <div class="card-body" style="padding: 5px;">
+                <div style="position: relative; height: 180px; width: 100%;">
                   <canvas id="volumeChart"></canvas>
                 </div>
               </div>
@@ -88,13 +88,26 @@
 @endsection
 
 @section('scripts')
+<style>
+  .stock-row.active {
+    background-color: #fff3cd !important;
+    font-weight: bold;
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <script>
 $(document).ready(function() {
     let priceChart, volumeChart;
 
+    // Register zoom plugin
+    if (typeof ChartJS !== 'undefined') {
+        Chart.register(ChartZoomPlugin);
+    }
+
     // Load chart for first stock
     if ($('.stock-link').length > 0) {
         const firstStock = $('.stock-link').first().data('stock');
+        $('.stock-link').first().closest('.stock-row').addClass('active');
         loadCharts(firstStock);
     }
 
@@ -102,6 +115,13 @@ $(document).ready(function() {
     $('.stock-link').on('click', function(e) {
         e.preventDefault();
         const stockCode = $(this).data('stock');
+        
+        // Remove active class from all rows
+        $('.stock-row').removeClass('active');
+        
+        // Add active class to clicked row
+        $(this).closest('.stock-row').addClass('active');
+        
         loadCharts(stockCode);
     });
 
@@ -153,56 +173,101 @@ $(document).ready(function() {
                 if (priceChart) priceChart.destroy();
                 if (volumeChart) volumeChart.destroy();
 
-                // Create price chart
+                // Create price chart with zoom plugin
                 const priceCtx = document.getElementById('priceChart').getContext('2d');
                 priceChart = new Chart(priceCtx, {
                     type: 'candlestick',
                     data: {
                         labels: commonLabels,
                         datasets: [{
-                            label: stockCode + ' - Giá',
+                            label: stockCode + ' (Nến giá)',
                             data: priceData,
                             color: {
-                                up: 'rgba(75, 192, 75, 1)',
-                                down: 'rgba(255, 99, 99, 1)',
-                                unchangedColor: 'rgba(125, 125, 125, 1)'
+                                up: '#26C281',
+                                down: '#EF553B',
+                                unchangedColor: '#999'
                             },
                             borderColor: {
-                                up: 'rgba(75, 192, 75, 1)',
-                                down: 'rgba(255, 99, 99, 1)',
-                                unchangedColor: 'rgba(125, 125, 125, 1)'
+                                up: '#26C281',
+                                down: '#EF553B',
+                                unchangedColor: '#999'
                             }
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
                         plugins: {
+                            zoom: {
+                                zoom: {
+                                    wheel: {
+                                        enabled: true,
+                                        speed: 0.1
+                                    },
+                                    pinch: {
+                                        enabled: true
+                                    },
+                                    mode: 'x'
+                                },
+                                pan: {
+                                    enabled: true,
+                                    mode: 'x'
+                                },
+                                limits: {
+                                    x: {min: 'original', max: 'original'},
+                                    y: {min: 'original', max: 'original'}
+                                }
+                            },
                             legend: {
                                 display: true,
-                                labels: { font: { size: 11 } }
+                                labels: { 
+                                    font: { size: 12 },
+                                    padding: 15
+                                }
                             }
                         },
                         scales: {
                             x: {
                                 type: 'category',
                                 display: true,
-                                offset: true,
+                                offset: false,
                                 title: { display: false },
-                                ticks: { display: false },
-                                grid: { display: true, drawBorder: false }
+                                ticks: { 
+                                    font: { size: 10 },
+                                    maxRotation: 45,
+                                    minRotation: 0,
+                                    autoSkip: true,
+                                    maxTicksLimit: 20
+                                },
+                                grid: { 
+                                    display: false, 
+                                    drawBorder: false,
+                                    color: 'rgba(200, 200, 200, 0.2)'
+                                }
                             },
                             y: { 
                                 title: { display: false },
                                 beginAtZero: false,
-                                grid: { display: true, drawBorder: false },
-                                ticks: { display: false }
+                                position: 'right',
+                                grid: { 
+                                    display: false, 
+                                    drawBorder: false,
+                                    color: 'rgba(200, 200, 200, 0.2)'
+                                },
+                                ticks: { 
+                                    font: { size: 10 },
+                                    display: false
+                                }
                             }
                         }
                     }
                 });
 
-                // Create volume chart
+                // Create volume chart with zoom plugin
                 const volumeCtx = document.getElementById('volumeChart').getContext('2d');
                 volumeChart = new Chart(volumeCtx, {
                     type: 'bar',
@@ -212,48 +277,93 @@ $(document).ready(function() {
                             {
                                 label: 'Tăng',
                                 data: upVolume,
-                                backgroundColor: 'rgba(75, 192, 75, 0.7)',
-                                borderColor: 'rgba(75, 192, 75, 1)',
+                                backgroundColor: '#26C281',
+                                borderColor: '#26C281',
                                 borderWidth: 0,
-                                categoryPercentage: 0.5,
-                                barPercentage: 0.5
+                                categoryPercentage: 0.8,
+                                barPercentage: 0.8
                             },
                             {
                                 label: 'Giảm',
                                 data: downVolume,
-                                backgroundColor: 'rgba(255, 99, 99, 0.7)',
-                                borderColor: 'rgba(255, 99, 99, 1)',
+                                backgroundColor: '#EF553B',
+                                borderColor: '#EF553B',
                                 borderWidth: 0,
-                                categoryPercentage: 0.5,
-                                barPercentage: 0.5
+                                categoryPercentage: 0.8,
+                                barPercentage: 0.8
                             }
                         ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
                         plugins: { 
+                            zoom: {
+                                zoom: {
+                                    wheel: {
+                                        enabled: true,
+                                        speed: 0.1
+                                    },
+                                    pinch: {
+                                        enabled: true
+                                    },
+                                    mode: 'x'
+                                },
+                                pan: {
+                                    enabled: true,
+                                    mode: 'x'
+                                },
+                                limits: {
+                                    x: {min: 'original', max: 'original'},
+                                    y: {min: 'original', max: 'original'}
+                                }
+                            },
                             legend: { 
                                 display: true,
                                 position: 'top',
-                                labels: { font: { size: 11 } }
+                                labels: { 
+                                    font: { size: 11 },
+                                    padding: 10
+                                }
                             } 
                         },
                         scales: {
                             x: {
                                 type: 'category',
-                                offset: true,
+                                offset: false,
                                 title: { display: false },
                                 stacked: true,
-                                ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 0, autoSkip: false },
-                                grid: { display: true, drawBorder: false }
+                                ticks: { 
+                                    font: { size: 9 }, 
+                                    maxRotation: 45, 
+                                    minRotation: 0, 
+                                    autoSkip: true,
+                                    maxTicksLimit: 20
+                                },
+                                grid: { 
+                                    display: false, 
+                                    drawBorder: false,
+                                    color: 'rgba(200, 200, 200, 0.2)'
+                                }
                             },
                             y: { 
                                 stacked: true,
                                 title: { display: false },
                                 beginAtZero: true,
-                                grid: { display: true, drawBorder: false },
-                                ticks: { display: false }
+                                position: 'right',
+                                grid: { 
+                                    display: false, 
+                                    drawBorder: false,
+                                    color: 'rgba(200, 200, 200, 0.2)'
+                                },
+                                ticks: { 
+                                    font: { size: 9 },
+                                    display: false
+                                }
                             }
                         }
                     }
@@ -305,8 +415,7 @@ $(document).ready(function() {
         const url = URL.createObjectURL(blob);
         
         link.setAttribute('href', url);
-        const now = new Date().toISOString().slice(0, 19).replace('T', '_').replace(/:/g, '-');
-        link.setAttribute('download', 'CP_tang_cao_3d_' + now + '.csv');
+        link.setAttribute('download', 'CP_ceiling_highest_3d_' + new Date().getTime() + '.csv');
         link.style.visibility = 'hidden';
         
         document.body.appendChild(link);

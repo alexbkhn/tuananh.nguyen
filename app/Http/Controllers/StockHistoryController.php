@@ -131,11 +131,19 @@ class StockHistoryController extends Controller
 
     public function getStockData($stock_code){
         try {
+            // Get data for last 90 days by default
+            // stock_date is stored as YYYYMMDD format (text), so we need to convert it
             $data = DB::table('stock')
                 ->where('stock_code', $stock_code)
+                ->whereRaw("STR_TO_DATE(stock_date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)")
                 ->orderBy('stock_date')
-                ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close']);
-            return response()->json($data);
+                ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
+            
+            // Return with cache-busting headers
+            return response()->json($data)
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -177,11 +185,21 @@ class StockHistoryController extends Controller
     }
 
     public function getStockData3Days($stock_code){
-        $data = DB::connection('mysql')->table('si.stock')
-            ->where('stock_code', $stock_code)
-            ->orderBy('stock_date')
-            ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
-        return response()->json($data);
+        try {
+            // Get data for last 90 days by default
+            // stock_date is stored as YYYYMMDD format (text), so we need to convert it
+            $data = DB::connection('mysql')->table('stock')
+                ->where('stock_code', $stock_code)
+                ->whereRaw("STR_TO_DATE(stock_date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)")
+                ->orderBy('stock_date')
+                ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
+            return response()->json($data)
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
 
@@ -269,11 +287,21 @@ class StockHistoryController extends Controller
     }
 
     public function getStockData2Days($stock_code){
-        $data = DB::connection('mysql')->table('si.stock')
-            ->where('stock_code', $stock_code)
-            ->orderBy('stock_date')
-            ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
-        return response()->json($data);
+        try {
+            // Get data for last 90 days by default
+            // stock_date is stored as YYYYMMDD format (text), so we need to convert it
+            $data = DB::connection('mysql')->table('stock')
+                ->where('stock_code', $stock_code)
+                ->whereRaw("STR_TO_DATE(stock_date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)")
+                ->orderBy('stock_date')
+                ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
+            return response()->json($data)
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function getHighestStocks2Days(){

@@ -92,37 +92,47 @@ class StockHistoryController extends Controller
     }
 
     public function getIncreasingStocks(){
-        $query = "
-            WITH ranked AS (
-                SELECT stock_code, stock_date, price_close,
-                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date) as rn
-                FROM si.stock
-            ),
-            diff AS (
-                SELECT stock_code, stock_date, price_close, rn,
-                       CASE WHEN price_close > LAG(price_close) OVER (PARTITION BY stock_code ORDER BY stock_date) THEN 1 ELSE 0 END as is_increase
-                FROM ranked
-            ),
-            grp_cte AS (
-                SELECT stock_code, stock_date, price_close, rn,
-                       SUM(1 - is_increase) OVER (PARTITION BY stock_code ORDER BY rn) as grp
-                FROM diff
-            )
-            SELECT DISTINCT stock_code
-            FROM grp_cte
-            GROUP BY stock_code, grp
-            HAVING COUNT(*) >= 3
-        ";
-        $stocks = DB::connection('mysql')->select($query);
-        $data['stocks'] = $stocks;
+        try {
+            $query = "
+                WITH ranked AS (
+                    SELECT stock_code, stock_date, price_close,
+                           ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date) as rn
+                    FROM stock
+                ),
+                diff AS (
+                    SELECT stock_code, stock_date, price_close, rn,
+                           CASE WHEN price_close > LAG(price_close) OVER (PARTITION BY stock_code ORDER BY stock_date) THEN 1 ELSE 0 END as is_increase
+                    FROM ranked
+                ),
+                grp_cte AS (
+                    SELECT stock_code, stock_date, price_close, rn,
+                           SUM(1 - is_increase) OVER (PARTITION BY stock_code ORDER BY rn) as grp
+                    FROM diff
+                )
+                SELECT DISTINCT stock_code
+                FROM grp_cte
+                GROUP BY stock_code, grp
+                HAVING COUNT(*) >= 3
+            ";
+            $stocks = DB::select($query);
+            $data['stocks'] = $stocks;
+            $data['message'] = count($stocks) == 0 ? 'Chưa có dữ liệu hoặc chưa có mã tăng giá 3 ngày liên tiếp' : '';
+        } catch (\Exception $e) {
+            $data['stocks'] = [];
+            $data['message'] = 'Lỗi: ' . $e->getMessage();
+        }
         return view('admin.stock_increasing.list', $data);
     }
 
     public function getStockData($stock_code){
-        $data = DB::connection('mysql')->table('si.stock')
-            ->where('stock_code', $stock_code)
-            ->orderBy('stock_date')
-            ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
-        return response()->json($data);
+        try {
+            $data = DB::table('stock')
+                ->where('stock_code', $stock_code)
+                ->orderBy('stock_date')
+                ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close']);
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

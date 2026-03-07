@@ -51,10 +51,12 @@ return new class extends Migration
         Schema::create('stock', function (Blueprint $table) {
             $table->id();
             $table->string('stock_code')->nullable();
+            $table->decimal('price_open', 12, 2)->nullable();
             $table->decimal('price_close', 12, 2)->nullable();
             $table->decimal('price_high', 12, 2)->nullable();
             $table->decimal('price_low', 12, 2)->nullable();
             $table->date('stock_date')->nullable();
+            $table->integer('volume')->nullable();
             $table->integer('is_delete')->default(0);
             $table->timestamps();
         });
@@ -91,7 +93,7 @@ return new class extends Migration
         Schema::dropIfExists('stock_history');
         Schema::dropIfExists('nav_savings');
         Schema::dropIfExists('stock');
-        Schema::dropIfExists('nav_history');
+        Schema::dropIfExists('stock_nav');
         Schema::dropIfExists('note_to_do');
     }
 };

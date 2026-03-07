@@ -49,20 +49,27 @@
                 <h3 class="card-title">Danh sách mã</h3>
               </div>
               <div class="card-body">
-                <table class="table table-bordered table-striped">
-                  <thead>
-                    <tr>
-                      <th>Mã chứng khoán</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @foreach($stocks as $stock)
-                    <tr>
-                      <td><a href="#" class="stock-link" data-stock="{{ $stock->stock_code }}">{{ $stock->stock_code }}</a></td>
-                    </tr>
-                    @endforeach
-                  </tbody>
-                </table>
+                <!-- Filter input -->
+                <div class="form-group">
+                  <input type="text" id="stockFilter" class="form-control" placeholder="Tìm kiếm mã chứng khoán...">
+                </div>
+                <!-- Scrollable table -->
+                <div style="max-height: 400px; overflow-y: auto;">
+                  <table class="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th>Mã chứng khoán</th>
+                      </tr>
+                    </thead>
+                    <tbody id="stockTableBody">
+                      @foreach($stocks as $stock)
+                      <tr>
+                        <td><a href="#" class="stock-link" data-stock="{{ $stock->stock_code }}">{{ $stock->stock_code }}</a></td>
+                      </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -251,6 +258,19 @@ $(document).ready(function() {
             }
         });
     }
+
+    // Filter functionality for stock list
+    $('#stockFilter').on('keyup', function() {
+        const filter = $(this).val().toLowerCase();
+        $('#stockTableBody tr').each(function() {
+            const stockCode = $(this).find('.stock-link').text().toLowerCase();
+            if (stockCode.includes(filter)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
 });
 </script>
 @endsection

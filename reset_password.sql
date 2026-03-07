@@ -1,0 +1,2 @@
+UPDATE users SET password = '$2y$12$yClobfPGWussBPKfCq5lDe7ueLA36KDnb0iXBba74koMJ13wYrSgS' WHERE email = 'anthn19@gmail.com';
+SELECT id, name, email, user_type FROM users WHERE email='anthn19@gmail.com';

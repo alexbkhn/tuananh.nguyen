@@ -92,13 +92,17 @@ class StockHistoryController extends Controller
     }
 
     public function getIncreasingStocks(){
-<<<<<<< HEAD
         try {
             $query = "
-                WITH ranked AS (
+                WITH recent_data AS (
+                    SELECT stock_code, stock_date, price_close
+                    FROM stock
+                    WHERE stock_date >= DATE_SUB((SELECT MAX(stock_date) FROM stock), INTERVAL 10 DAY)
+                ),
+                ranked AS (
                     SELECT stock_code, stock_date, price_close,
                            ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date) as rn
-                    FROM stock
+                    FROM recent_data
                 ),
                 diff AS (
                     SELECT stock_code, stock_date, price_close, rn,
@@ -122,36 +126,6 @@ class StockHistoryController extends Controller
             $data['stocks'] = [];
             $data['message'] = 'Lỗi: ' . $e->getMessage();
         }
-=======
-        $query = "
-            WITH recent_data AS (
-                SELECT stock_code, stock_date, price_close
-                FROM si.stock
-                WHERE stock_date >= DATE_SUB((SELECT MAX(stock_date) FROM si.stock), INTERVAL 10 DAY)
-            ),
-            ranked AS (
-                SELECT stock_code, stock_date, price_close,
-                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date) as rn
-                FROM recent_data
-            ),
-            diff AS (
-                SELECT stock_code, stock_date, price_close, rn,
-                       CASE WHEN price_close > LAG(price_close) OVER (PARTITION BY stock_code ORDER BY stock_date) THEN 1 ELSE 0 END as is_increase
-                FROM ranked
-            ),
-            grp_cte AS (
-                SELECT stock_code, stock_date, price_close, rn,
-                       SUM(1 - is_increase) OVER (PARTITION BY stock_code ORDER BY rn) as grp
-                FROM diff
-            )
-            SELECT DISTINCT stock_code
-            FROM grp_cte
-            GROUP BY stock_code, grp
-            HAVING COUNT(*) >= 3
-        ";
-        $stocks = DB::connection('mysql')->select($query);
-        $data['stocks'] = $stocks;
->>>>>>> f58260e370a78e2c538153425db75c7d4dc61e5c
         return view('admin.stock_increasing.list', $data);
     }
 

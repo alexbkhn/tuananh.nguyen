@@ -4,7 +4,7 @@
 - ✓ Cài đặt Composer PHP dependencies
 - ✓ Tạo file .env với cấu hình MySQL
 - ✓ Generate APP_KEY (mã mã hóa)
-- ✓ Tạo database: `tuananh_nguyen`
+- ✓ Tạo database: `si`
 - ✓ Chạy database migrations (tạo bảng)
 - ✓ Cài đặt npm JavaScript dependencies
 
@@ -43,7 +43,7 @@
 | Thành Phần | Chi Tiết |
 |-----------|---------|
 | **URL** | http://localhost:8000 |
-| **Database** | tuananh_nguyen (MySQL) |
+| **Database** | si (MySQL) |
 | **Tài khoản DB** | root (không có mật khẩu) |
 | **Laravel Version** | 11.9 |
 | **PHP Version** | 8.2.12 |
@@ -95,7 +95,7 @@ C:\xampp\php\php.exe artisan tinker
 3. Kiểm tra cấu hình trong file `.env`:
    - `DB_HOST=127.0.0.1`
    - `DB_PORT=3306`
-   - `DB_DATABASE=tuananh_nguyen`
+   - `DB_DATABASE=si`
    - `DB_USERNAME=root`
    - `DB_PASSWORD` (để trống nếu chưa đặt mật khẩu)
 

@@ -25,16 +25,20 @@
               <div class="card-header">
                 <h3 class="card-title">Biểu đồ giá</h3>
               </div>
-              <div class="card-body">
-                <canvas id="priceChart"></canvas>
+              <div class="card-body" style="padding: 10px;">
+                <div style="position: relative; height: 350px; width: 100%;">
+                  <canvas id="priceChart"></canvas>
+                </div>
               </div>
             </div>
-            <div class="card card-info" style="margin-top: 20px;">
+            <div class="card card-info" style="margin-top: 10px;">
               <div class="card-header">
                 <h3 class="card-title">Khối lượng giao dịch</h3>
               </div>
-              <div class="card-body">
-                <canvas id="volumeChart"></canvas>
+              <div class="card-body" style="padding: 10px;">
+                <div style="position: relative; height: 150px; width: 100%;">
+                  <canvas id="volumeChart"></canvas>
+                </div>
               </div>
             </div>
           </div>
@@ -100,7 +104,7 @@ $(document).ready(function() {
 
                 console.log('Data received:', data);
 
-                // Prepare price data for candlestick
+                // Prepare price data for candlestick with colors
                 const priceData = data.map((item, index) => ({
                     x: index,
                     o: parseFloat(item.price_open),
@@ -109,11 +113,27 @@ $(document).ready(function() {
                     c: parseFloat(item.price_close)
                 }));
 
-                console.log('Price data:', priceData);
-
-                // Prepare volume data
+                // Prepare volume data with colors based on price movement
                 const volumeLabels = data.map(item => item.stock_date);
-                const volumeData = data.map(item => parseInt(item.volume) || 0);
+                const volumeDatasets = [];
+                const upVolume = [];
+                const downVolume = [];
+                
+                data.forEach((item, index) => {
+                    const volume = parseInt(item.volume) || 0;
+                    if (parseFloat(item.price_close) >= parseFloat(item.price_open)) {
+                        upVolume.push(volume);
+                        downVolume.push(0);
+                    } else {
+                        upVolume.push(0);
+                        downVolume.push(volume);
+                    }
+                });
+
+                // Create common labels for both charts
+                const commonLabels = data.map(item => item.stock_date);
+
+                console.log('Price data:', priceData);
 
                 // Destroy old charts
                 if (priceChart) priceChart.destroy();
@@ -124,29 +144,45 @@ $(document).ready(function() {
                 priceChart = new Chart(priceCtx, {
                     type: 'candlestick',
                     data: {
-                        labels: data.map(item => item.stock_date),
+                        labels: commonLabels,
                         datasets: [{
                             label: stockCode + ' - Giá',
-                            data: priceData
+                            data: priceData,
+                            color: {
+                                up: 'rgba(75, 192, 75, 1)',
+                                down: 'rgba(255, 99, 99, 1)',
+                                unchangedColor: 'rgba(125, 125, 125, 1)'
+                            },
+                            borderColor: {
+                                up: 'rgba(75, 192, 75, 1)',
+                                down: 'rgba(255, 99, 99, 1)',
+                                unchangedColor: 'rgba(125, 125, 125, 1)'
+                            }
                         }]
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: {
                                 display: true,
-                                labels: { font: { size: 12 } }
+                                labels: { font: { size: 11 } }
                             }
                         },
                         scales: {
                             x: {
                                 type: 'category',
                                 display: true,
-                                title: { display: true, text: 'Ngày' }
+                                offset: true,
+                                title: { display: false },
+                                ticks: { display: false },
+                                grid: { display: true, drawBorder: false }
                             },
                             y: { 
-                                title: { display: true, text: 'Giá (VND)' },
-                                beginAtZero: false
+                                title: { display: false },
+                                beginAtZero: false,
+                                grid: { display: true, drawBorder: false },
+                                ticks: { display: false }
                             }
                         }
                     }
@@ -157,27 +193,54 @@ $(document).ready(function() {
                 volumeChart = new Chart(volumeCtx, {
                     type: 'bar',
                     data: {
-                        labels: volumeLabels,
-                        datasets: [{
-                            label: 'Khối lượng',
-                            data: volumeData,
-                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }]
+                        labels: commonLabels,
+                        datasets: [
+                            {
+                                label: 'Tăng',
+                                data: upVolume,
+                                backgroundColor: 'rgba(75, 192, 75, 0.7)',
+                                borderColor: 'rgba(75, 192, 75, 1)',
+                                borderWidth: 0,
+                                categoryPercentage: 0.5,
+                                barPercentage: 0.5
+                            },
+                            {
+                                label: 'Giảm',
+                                data: downVolume,
+                                backgroundColor: 'rgba(255, 99, 99, 0.7)',
+                                borderColor: 'rgba(255, 99, 99, 1)',
+                                borderWidth: 0,
+                                categoryPercentage: 0.5,
+                                barPercentage: 0.5
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
-                        plugins: { legend: { display: true } },
+                        maintainAspectRatio: false,
+                        plugins: { 
+                            legend: { 
+                                display: true,
+                                position: 'top',
+                                labels: { font: { size: 11 } }
+                            } 
+                        },
                         scales: {
                             x: {
-                                type: 'time',
-                                time: {
-                                    unit: 'day',
-                                    displayFormats: { day: 'MMM DD' }
-                                }
+                                type: 'category',
+                                offset: true,
+                                title: { display: false },
+                                stacked: true,
+                                ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 0, autoSkip: false },
+                                grid: { display: true, drawBorder: false }
                             },
-                            y: { title: { display: true, text: 'Khối lượng' } }
+                            y: { 
+                                stacked: true,
+                                title: { display: false },
+                                beginAtZero: true,
+                                grid: { display: true, drawBorder: false },
+                                ticks: { display: false }
+                            }
                         }
                     }
                 });

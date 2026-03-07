@@ -220,6 +220,12 @@
                   <p>Công ty chứng khoán</p>
                 </a>
               </li>
+              <li class="nav-item">
+                <a href="{{ url('admin/stock_increasing/list') }}" class="nav-link">
+                  <i class="fa fa-arrow-trending-up nav-icon"></i>
+                  <p>Mã tăng giá 3 ngày</p>
+                </a>
+              </li>
             </ul>
           </li>
           <!-- Giao dịch thử nghiệm -->

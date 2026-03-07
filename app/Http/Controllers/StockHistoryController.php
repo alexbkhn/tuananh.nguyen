@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\StockHistoryModel;
 use App\Models\StockCompanyModel;
 use Auth;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -88,5 +89,40 @@ class StockHistoryController extends Controller
         $save->save();
         //return redirect('admin/class/list')->with('success', "Calss successfully deleted");
         return redirect()->back()->with('success', "Xóa bản ghi thành công");
+    }
+
+    public function getIncreasingStocks(){
+        $query = "
+            WITH ranked AS (
+                SELECT stock_code, stock_date, price_close,
+                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date) as rn
+                FROM si.stock
+            ),
+            diff AS (
+                SELECT stock_code, stock_date, price_close, rn,
+                       CASE WHEN price_close > LAG(price_close) OVER (PARTITION BY stock_code ORDER BY stock_date) THEN 1 ELSE 0 END as is_increase
+                FROM ranked
+            ),
+            grp_cte AS (
+                SELECT stock_code, stock_date, price_close, rn,
+                       SUM(1 - is_increase) OVER (PARTITION BY stock_code ORDER BY rn) as grp
+                FROM diff
+            )
+            SELECT DISTINCT stock_code
+            FROM grp_cte
+            GROUP BY stock_code, grp
+            HAVING COUNT(*) >= 3
+        ";
+        $stocks = DB::connection('mysql')->select($query);
+        $data['stocks'] = $stocks;
+        return view('admin.stock_increasing.list', $data);
+    }
+
+    public function getStockData($stock_code){
+        $data = DB::connection('mysql')->table('si.stock')
+            ->where('stock_code', $stock_code)
+            ->orderBy('stock_date')
+            ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
+        return response()->json($data);
     }
 }

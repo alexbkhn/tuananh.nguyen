@@ -53,8 +53,14 @@
 </script>
 <!-- Bootstrap 4 -->
 <script src="{{ url('public/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<!-- moment.js (required before chartjs-adapter-moment) -->
+<script src="{{ url('public/plugins/moment/moment.min.js') }}"></script>
 <!-- ChartJS -->
-<script src="{{ url('public/plugins/chart.js/Chart.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.js"></script>
+<!-- Chart.js Financial Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
+<!-- Chart.js Moment Adapter -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
 <!-- Sparkline -->
 <script src="{{ url('public/plugins/sparklines/sparkline.js') }}"></script>
 <!-- JQVMap -->
@@ -82,6 +88,6 @@
 
 <!-- ChartJS -->
 <script src="/plugins/chart.js/Chart.bundle.js"></script>
-
+@yield('scripts')
 </body>
 </html>

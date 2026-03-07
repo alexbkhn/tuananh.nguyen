@@ -49,6 +49,10 @@ Route::get('admin/stock_history/edit/{id}', [StockHistoryController::class, 'edi
 Route::post('admin/stock_history/edit/{id}', [StockHistoryController::class, 'update']);
 Route::get('admin/stock_history/delete/{id}', [StockHistoryController::class, 'delete']);
 
+// Mã tăng giá 3 ngày liên tiếp
+Route::get('admin/stock_increasing/list', [StockHistoryController::class, 'getIncreasingStocks']);
+Route::get('admin/stock_increasing/data/{stock_code}', [StockHistoryController::class, 'getStockData']);
+
 // Lịch sử vốn
 Route::get('admin/nav_history/list', [NavHistoryController::class, 'getNavHistory']);
 Route::post('admin/nav_history/list', [NavHistoryController::class, 'insert']);

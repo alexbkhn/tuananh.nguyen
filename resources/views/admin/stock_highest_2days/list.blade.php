@@ -494,7 +494,7 @@ $(document).ready(function() {
         <ul>
           <li><strong>Giá đóng cửa tăng 2 ngày liên tiếp:</strong> Giá đóng cửa của ngày thứ 2 phải cao hơn ngày thứ 1</li>
           <li><strong>Khối lượng giao dịch:</strong> Khối lượng phải > 1000 cho cả 2 ngày</li>
-          <li><strong>Thời gian:</strong> Chỉ xét dữ liệu trong 3 ngày gần nhất</li>
+          <li><strong>Thời gian:</strong> Chỉ xét dữ liệu trong 2 ngày gần nhất</li>
         </ul>
         
         <h6 class="mb-2"><strong>Cách sử dụng:</strong></h6>

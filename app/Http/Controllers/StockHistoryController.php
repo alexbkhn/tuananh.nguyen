@@ -109,7 +109,7 @@ class StockHistoryController extends Controller
                        ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date) as seq,
                        LAG(stock_date) OVER (PARTITION BY stock_code ORDER BY stock_date) as prev_date,
                        LAG(price_close) OVER (PARTITION BY stock_code ORDER BY stock_date) as prev_close,
-                       CASE WHEN price_close = price_high AND price_high = price_open AND price_open = price_low THEN 1 ELSE 0 END as is_ceiling
+                       CASE WHEN price_close = price_high THEN 1 ELSE 0 END as is_ceiling
                 FROM last_2_filtered
             ),
             ceiling_check AS (

@@ -233,6 +233,14 @@ $(document).ready(function() {
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        layout: {
+                            padding: {
+                                left: 15,
+                                right: 15,
+                                top: 10,
+                                bottom: 10
+                            }
+                        },
                         interaction: {
                             intersect: false,
                             mode: 'index'
@@ -274,7 +282,7 @@ $(document).ready(function() {
                             x: {
                                 type: 'category',
                                 display: true,
-                                offset: false,
+                                offset: true,
                                 title: { display: false },
                                 ticks: { 
                                     font: { size: 10 },
@@ -337,6 +345,14 @@ $(document).ready(function() {
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        layout: {
+                            padding: {
+                                left: 15,
+                                right: 15,
+                                top: 10,
+                                bottom: 10
+                            }
+                        },
                         interaction: {
                             intersect: false,
                             mode: 'index'
@@ -369,7 +385,7 @@ $(document).ready(function() {
                         scales: {
                             x: {
                                 type: 'category',
-                                offset: false,
+                                offset: true,
                                 title: { display: false },
                                 stacked: true,
                                 ticks: { 

@@ -9,7 +9,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Cây nến sàn 2 ngày - 90 ngày gần nhất <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#infoModal" style="margin-left: 10px;"><i class="fas fa-info-circle"></i></button></h1>
+            <h1>CP trần 2 ngày liên tiếp <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#infoModal" style="margin-left: 10px;"><i class="fas fa-info-circle"></i></button></h1>
           </div>
         </div>
       </div>
@@ -23,7 +23,7 @@
           <div class="col-md-8">
             <div class="card card-primary">
               <div class="card-header">
-                <h3 class="card-title">Biểu đồ giá nến - 90 ngày gần nhất</h3>
+                <h3 class="card-title">Biểu đồ giá nến</h3>
               </div>
               <div class="card-body" style="padding: 5px;">
                 <div style="position: relative; height: 400px; width: 100%;">
@@ -471,7 +471,7 @@ $(document).ready(function() {
         </button>
       </div>
       <div class="modal-body">
-        <h6 class="mb-3"><strong>Tính năng: Cây nến sàn 2 ngày - 90 ngày gần nhất</strong></h6>
+        <h6 class="mb-3"><strong>Tính năng: CP trần 2 ngày liên tiếp mới nhất</strong></h6>
         <p>Danh sách này hiển thị các mã chứng khoán có nến trần trong 2 ngày liên tiếp, được lọc từ dữ liệu 3 ngày gần nhất.</p>
         
         <h6 class="mb-2"><strong>Điều kiện lọc:</strong></h6>

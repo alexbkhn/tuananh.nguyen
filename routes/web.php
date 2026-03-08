@@ -48,13 +48,6 @@ Route::get('admin/stock_history/edit/{id}', [StockHistoryController::class, 'edi
 Route::post('admin/stock_history/edit/{id}', [StockHistoryController::class, 'update']);
 Route::get('admin/stock_history/delete/{id}', [StockHistoryController::class, 'delete']);
 
-// Mã tăng giá 3 ngày liên tiếp
-Route::get('admin/stock_increasing/list', [StockHistoryController::class, 'getIncreasingStocks']);
-Route::get('admin/stock_increasing/data/{stock_code}', [StockHistoryController::class, 'getStockData']);
-
-// Mã tăng giá 3 ngày liên tiếp trong 3 ngày gần nhất
-Route::get('admin/stock_increasing_3days/list', [StockHistoryController::class, 'getIncreasingStocks3Days']);
-Route::get('admin/stock_increasing_3days/data/{stock_code}', [StockHistoryController::class, 'getStockData3Days']);
 
 // Mã tăng trần 3 ngày liên tiếp trong 3 ngày gần nhất (đã loại bỏ tính năng)
 // (routes đã bị xóa)
@@ -66,10 +59,6 @@ Route::get('admin/stock_ceiling_2days/data/{stock_code}', [StockHistoryControlle
 // Mã tăng cao 2 ngày liên tiếp trong 2 ngày gần nhất
 Route::get('admin/stock_highest_2days/list', [StockHistoryController::class, 'getHighestStocks2Days']);
 Route::get('admin/stock_highest_2days/data/{stock_code}', [StockHistoryController::class, 'getStockData2Days']);
-
-// Mã tăng cao 3 ngày liên tiếp trong 3 ngày gần nhất
-Route::get('admin/stock_ceiling_highest_3days/list', [StockHistoryController::class, 'getCeilingHighest3Days']);
-Route::get('admin/stock_ceiling_highest_3days/data/{stock_code}', [StockHistoryController::class, 'getStockData3Days']);
 
 // Lịch sử vốn
 Route::get('admin/nav_history/list', [NavHistoryController::class, 'getNavHistory']);

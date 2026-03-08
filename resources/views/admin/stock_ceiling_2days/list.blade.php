@@ -20,7 +20,7 @@
       <div class="container-fluid">
         <div class="row">
           <!-- Biểu đồ bên trái -->
-          <div class="col-md-8">
+          <div class="col-md-10">
             <div class="card card-primary">
               <div class="card-header">
                 <h3 class="card-title">Biểu đồ giá nến</h3>
@@ -43,7 +43,7 @@
             </div>
           </div>
           <!-- Danh sách mã bên phải -->
-          <div class="col-md-4">
+          <div class="col-md-2">
             <div class="card card-primary">
               <div class="card-header">
                 <h3 class="card-title">Danh sách mã</h3>
@@ -56,8 +56,8 @@
                 <!-- Total count and export button -->
                 <div class="d-flex justify-content-between align-items-center mb-2">
                   <small class="text-muted">Tổng số mã: <span id="totalStocks">{{ count($stocks) }}</span></small>
-                  <button id="exportBtn" class="btn btn-sm btn-success">
-                    <i class="fas fa-download"></i> Export CSV
+                  <button id="exportBtn" class="btn btn-sm btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                    <i class="fas fa-download"></i> Export
                   </button>
                 </div>
                 <!-- Scrollable table -->
@@ -492,7 +492,7 @@ $(document).ready(function() {
         
         <h6 class="mb-2"><strong>Điều kiện lọc:</strong></h6>
         <ul>
-          <li><strong>Nến trần 2 ngày liên tiếp:</strong> Giá đóng cửa = giá cao nhất = giá mở cửa = giá thấp nhất trong 2 ngày liên tiếp</li>
+          <li><strong>Nến trần 2 ngày liên tiếp:</strong> Giá đóng cửa = giá cao nhất trong 2 ngày liên tiếp</li>
           <li><strong>Giá đóng cửa tăng:</strong> Giá đóng cửa của ngày thứ 2 phải cao hơn ngày thứ 1</li>
           <li><strong>Khối lượng giao dịch:</strong> Khối lượng phải > 1000 cho cả 2 ngày</li>
           <li><strong>Thời gian:</strong> Chỉ xét dữ liệu trong 2 ngày gần nhất</li>

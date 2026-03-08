@@ -221,6 +221,12 @@
                 </a>
               </li>
               <li class="nav-item">
+                <a href="{{ url('admin/stock_ceiling_1day/list') }}" class="nav-link">
+                  <i class="fa fa-address-card nav-icon"></i>
+                  <p>CP tăng trần 1d</p>
+                </a>
+              </li>
+              <li class="nav-item">
                 <a href="{{ url('admin/stock_ceiling_2days/list') }}" class="nav-link">
                   <i class="fa fa-address-card nav-icon"></i>
                   <p>CP tăng trần 2d</p>

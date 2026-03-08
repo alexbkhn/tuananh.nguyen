@@ -139,11 +139,11 @@ class StockHistoryController extends Controller
 
     public function getStockData2Days($stock_code){
         try {
-            // Get data for last 90 days by default
+            // Get data for last 180 days by default
             // stock_date is stored as YYYYMMDD format (text), so we need to convert it
             $data = DB::connection('mysql')->table('stock')
                 ->where('stock_code', $stock_code)
-                ->whereRaw("STR_TO_DATE(stock_date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)")
+                ->whereRaw("STR_TO_DATE(stock_date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 180 DAY)")
                 ->orderBy('stock_date')
                 ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
             return response()->json($data)
@@ -196,5 +196,71 @@ class StockHistoryController extends Controller
         $stocks = DB::connection('mysql')->select($query);
         $data['stocks'] = $stocks;
         return view('admin.stock_highest_2days.list', $data);
+    }
+
+    public function getCeilingStocks1Day(){
+        $query = "
+            WITH last_2_each_stock AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume,
+                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date DESC) as rn
+                FROM si.stock
+                WHERE LENGTH(stock_code) = 3
+            ),
+            last_2_filtered AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume
+                FROM last_2_each_stock
+                WHERE rn <= 2
+            ),
+            last_2_ordered AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume,
+                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date) as seq,
+                       LAG(stock_date) OVER (PARTITION BY stock_code ORDER BY stock_date) as prev_date,
+                       LAG(price_close) OVER (PARTITION BY stock_code ORDER BY stock_date) as prev_close,
+                       LAG(volume) OVER (PARTITION BY stock_code ORDER BY stock_date) as prev_volume,
+                       CASE WHEN price_close = price_high THEN 1 ELSE 0 END as is_ceiling
+                FROM last_2_filtered
+            ),
+            ceiling_1day_check AS (
+                SELECT stock_code,
+                       COUNT(*) as total_records,
+                       MAX(stock_date) as latest_date,
+                       MIN(stock_date) as earliest_date,
+                       SUM(CASE WHEN seq = 2 
+                                AND is_ceiling = 1 
+                                AND price_close > prev_close 
+                                AND volume >= prev_volume * 2 
+                                AND volume >= 1000
+                           THEN 1 ELSE 0 END) as ceiling_1day_count
+                FROM last_2_ordered
+                GROUP BY stock_code
+            )
+            SELECT stock_code
+            FROM ceiling_1day_check
+            WHERE total_records = 2
+              AND ceiling_1day_count = 1
+              AND latest_date >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)
+              AND DATEDIFF(latest_date, earliest_date) <= 1
+        ";
+        $stocks = DB::connection('mysql')->select($query);
+        $data['stocks'] = $stocks;
+        return view('admin.stock_ceiling_1day.list', $data);
+    }
+
+    public function getStockData1Day($stock_code){
+        try {
+            // Get data for last 180 days by default
+            // stock_date is stored as YYYYMMDD format (text), so we need to convert it
+            $data = DB::connection('mysql')->table('stock')
+                ->where('stock_code', $stock_code)
+                ->whereRaw("STR_TO_DATE(stock_date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 180 DAY)")
+                ->orderBy('stock_date')
+                ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
+            return response()->json($data)
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

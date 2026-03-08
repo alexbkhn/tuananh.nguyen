@@ -56,6 +56,10 @@ Route::get('admin/stock_history/delete/{id}', [StockHistoryController::class, 'd
 Route::get('admin/stock_ceiling_2days/list', [StockHistoryController::class, 'getCeilingStocks2Days']);
 Route::get('admin/stock_ceiling_2days/data/{stock_code}', [StockHistoryController::class, 'getStockData2Days']);
 
+// Mã tăng trần 1 ngày mới nhất trong 2 ngày gần nhất
+Route::get('admin/stock_ceiling_1day/list', [StockHistoryController::class, 'getCeilingStocks1Day']);
+Route::get('admin/stock_ceiling_1day/data/{stock_code}', [StockHistoryController::class, 'getStockData1Day']);
+
 // Mã tăng cao 2 ngày liên tiếp trong 2 ngày gần nhất
 Route::get('admin/stock_highest_2days/list', [StockHistoryController::class, 'getHighestStocks2Days']);
 Route::get('admin/stock_highest_2days/data/{stock_code}', [StockHistoryController::class, 'getStockData2Days']);

@@ -9,7 +9,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>CP tăng cao 2 ngày gần nhất <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#infoModal" style="margin-left: 10px;"><i class="fas fa-info-circle"></i></button></h1>
+            <h1>CP trần 1 ngày mới nhất <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#infoModal" style="margin-left: 10px;"><i class="fas fa-info-circle"></i></button></h1>
           </div>
         </div>
       </div>
@@ -162,7 +162,7 @@ $(document).ready(function() {
 
     function loadCharts(stockCode) {
         $.ajax({
-            url: '{{ url("admin/stock_highest_2days/data") }}/' + stockCode,
+            url: '{{ url("admin/stock_ceiling_1day/data") }}/' + stockCode,
             type: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -466,7 +466,7 @@ $(document).ready(function() {
         const url = URL.createObjectURL(blob);
         
         link.setAttribute('href', url);
-        link.setAttribute('download', 'CP_highest_2d_' + new Date().getTime() + '.csv');
+        link.setAttribute('download', 'CP_ceiling_1d_' + new Date().getTime() + '.csv');
         link.style.visibility = 'hidden';
         
         document.body.appendChild(link);
@@ -487,13 +487,14 @@ $(document).ready(function() {
         </button>
       </div>
       <div class="modal-body">
-        <h6 class="mb-3"><strong>Tính năng: CP tăng cao 2 ngày gần nhất</strong></h6>
-        <p>Danh sách này hiển thị các mã chứng khoán có giá đóng cửa tăng liên tiếp trong 2 ngày, được lọc từ dữ liệu 3 ngày gần nhất.</p>
+        <h6 class="mb-3"><strong>Tính năng: CP trần 1 ngày mới nhất</strong></h6>
+        <p>Danh sách này hiển thị các mã chứng khoán có nến trần trong ngày mới nhất, được lọc từ dữ liệu 2 ngày gần nhất.</p>
         
         <h6 class="mb-2"><strong>Điều kiện lọc:</strong></h6>
         <ul>
-          <li><strong>Giá đóng cửa tăng 2 ngày liên tiếp:</strong> Giá đóng cửa của ngày thứ 2 phải cao hơn ngày thứ 1</li>
-          <li><strong>Khối lượng giao dịch:</strong> Khối lượng phải > 1000 cho cả 2 ngày</li>
+          <li><strong>Nến trần trong ngày mới nhất:</strong> Giá đóng cửa = giá cao nhất trong ngày mới nhất</li>
+          <li><strong>Giá đóng cửa tăng:</strong> Giá đóng cửa của ngày mới nhất phải cao hơn ngày hôm trước</li>
+          <li><strong>Khối lượng giao dịch:</strong> Khối lượng ngày mới nhất lớn hơn 1000 và >= 2 lần khối lượng ngày hôm trước</li>
           <li><strong>Thời gian:</strong> Chỉ xét dữ liệu trong 2 ngày gần nhất</li>
         </ul>
         

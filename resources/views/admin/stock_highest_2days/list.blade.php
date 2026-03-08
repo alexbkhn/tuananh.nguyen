@@ -215,7 +215,7 @@ $(document).ready(function() {
                     data: {
                         labels: commonLabels,
                         datasets: [{
-                            label: stockCode + ' (Nến giá)',
+                            label: stockCode,
                             data: priceData,
                             color: {
                                 up: '#26C281',

@@ -9,7 +9,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Cây nến tăng giới hạn cao nhất 3 ngày - 90 ngày gần nhất</h1>
+            <h1>Cây nến sàn nhất 3 ngày - 90 ngày gần nhất <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#infoModal" style="margin-left: 10px;"><i class="fas fa-info-circle"></i></button></h1>
           </div>
         </div>
       </div>
@@ -98,6 +98,7 @@
 <script>
 $(document).ready(function() {
     let priceChart, volumeChart;
+    let currentIndex = 0;
 
     // Register zoom plugin
     if (typeof ChartJS !== 'undefined') {
@@ -109,7 +110,37 @@ $(document).ready(function() {
         const firstStock = $('.stock-link').first().data('stock');
         $('.stock-link').first().closest('.stock-row').addClass('active');
         loadCharts(firstStock);
+        currentIndex = 0;
     }
+
+    // Keyboard navigation
+    $(document).on('keydown', function(e) {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            const visibleRows = $('#stockTableBody .stock-row:visible');
+            if (visibleRows.length === 0) return;
+            
+            if (e.key === 'ArrowUp') {
+                currentIndex = currentIndex > 0 ? currentIndex - 1 : visibleRows.length - 1;
+            } else {
+                currentIndex = currentIndex < visibleRows.length - 1 ? currentIndex + 1 : 0;
+            }
+            
+            // Ensure currentIndex is within bounds
+            if (currentIndex >= visibleRows.length) currentIndex = visibleRows.length - 1;
+            if (currentIndex < 0) currentIndex = 0;
+            
+            const selectedRow = visibleRows.eq(currentIndex);
+            $('.stock-row').removeClass('active');
+            selectedRow.addClass('active');
+            
+            const stockCode = selectedRow.find('.stock-link').data('stock');
+            loadCharts(stockCode);
+            
+            // Scroll into view
+            selectedRow[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    });
 
     // Handle click on stock link
     $('.stock-link').on('click', function(e) {
@@ -121,6 +152,10 @@ $(document).ready(function() {
         
         // Add active class to clicked row
         $(this).closest('.stock-row').addClass('active');
+        
+        // Update current index
+        const visibleRows = $('#stockTableBody .stock-row:visible');
+        currentIndex = visibleRows.index($(this).closest('.stock-row'));
         
         loadCharts(stockCode);
     });
@@ -191,7 +226,8 @@ $(document).ready(function() {
                                 up: '#26C281',
                                 down: '#EF553B',
                                 unchangedColor: '#999'
-                            }
+                            },
+                            borderWidth: 2
                         }]
                     },
                     options: {
@@ -229,6 +265,10 @@ $(document).ready(function() {
                                     padding: 15
                                 }
                             }
+                        },
+                        candlestick: {
+                            fallingColor: { strokeWidth: 1, fill: '#EF553B', stroke: '#EF553B' }, // red for down
+                            risingColor: { strokeWidth: 1, fill: '#26C281', stroke: '#26C281' }   // green for up
                         },
                         scales: {
                             x: {
@@ -323,12 +363,7 @@ $(document).ready(function() {
                                 }
                             },
                             legend: { 
-                                display: true,
-                                position: 'top',
-                                labels: { 
-                                    font: { size: 11 },
-                                    padding: 10
-                                }
+                                display: false
                             } 
                         },
                         scales: {
@@ -424,4 +459,47 @@ $(document).ready(function() {
     });
 });
 </script>
+
+<!-- Info Modal -->
+<div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="infoModalLabel">Thông tin điều kiện lọc</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h6 class="mb-3"><strong>Tính năng: Cây nến sàn nhất 3 ngày - 90 ngày gần nhất</strong></h6>
+        <p>Danh sách này hiển thị các mã chứng khoán có nến trần trong 3 ngày liên tiếp, được lọc từ dữ liệu 3 ngày gần nhất.</p>
+        
+        <h6 class="mb-2"><strong>Điều kiện lọc:</strong></h6>
+        <ul>
+          <li><strong>Nến trần 3 ngày liên tiếp:</strong> Giá đóng cửa = giá cao nhất = giá mở cửa = giá thấp nhất trong 3 ngày liên tiếp</li>
+          <li><strong>Giá đóng cửa tăng liên tiếp:</strong> Giá đóng cửa phải tăng liên tục trong 3 ngày liên tiếp</li>
+          <li><strong>Thời gian:</strong> Chỉ xét dữ liệu trong 3 ngày gần nhất</li>
+        </ul>
+        
+        <h6 class="mb-2"><strong>Cách sử dụng:</strong></h6>
+        <ul>
+          <li>Sử dụng <strong>phím mũi tên lên/xuống</strong> để điều hướng qua danh sách mã</li>
+          <li>Biểu đồ giá nến và khối lượng sẽ cập nhật tự động theo mã được chọn</li>
+          <li>Dùng ô tìm kiếm để lọc mã chứng khoán theo tên</li>
+          <li>Bấm nút <strong>Export CSV</strong> để tải xuống danh sách</li>
+        </ul>
+        
+        <h6 class="mb-2"><strong>Màu sắc biểu đồ:</strong></h6>
+        <ul>
+          <li><span style="color: #26C281;"><strong>Xanh lá (#26C281):</strong></span> Nến/khối lượng tăng (close >= open)</li>
+          <li><span style="color: #EF553B;"><strong>Đỏ (#EF553B):</strong></span> Nến/khối lượng giảm (close < open)</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection

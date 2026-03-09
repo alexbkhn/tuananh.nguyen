@@ -64,6 +64,10 @@ Route::get('admin/stock_ceiling_1day/data/{stock_code}', [StockHistoryController
 Route::get('admin/stock_highest_2days/list', [StockHistoryController::class, 'getHighestStocks2Days']);
 Route::get('admin/stock_highest_2days/data/{stock_code}', [StockHistoryController::class, 'getStockData2Days']);
 
+// Mã tăng vsa 1 vs 3d (giá tăng và khối lượng tăng gấp >= 2x so với trung bình 3 ngày trước)
+Route::get('admin/stock_vsa_volume_1vs3d/list', [StockHistoryController::class, 'getVsaVolume1vs3d']);
+Route::get('admin/stock_vsa_volume_1vs3d/data/{stock_code}', [StockHistoryController::class, 'getStockDataVsaVolume']);
+
 // Lịch sử vốn
 Route::get('admin/nav_history/list', [NavHistoryController::class, 'getNavHistory']);
 Route::post('admin/nav_history/list', [NavHistoryController::class, 'insert']);

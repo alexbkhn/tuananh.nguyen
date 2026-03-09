@@ -263,4 +263,75 @@ class StockHistoryController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function getVsaVolume1vs3d(){
+        $query = "
+            WITH last_3_each_stock AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume,
+                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date DESC) as rn
+                FROM si.stock
+                WHERE LENGTH(stock_code) = 3
+            ),
+            last_3_filtered AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume
+                FROM last_3_each_stock
+                WHERE rn <= 3
+            ),
+            last_3_ordered AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume,
+                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date) as seq,
+                       AVG(volume) OVER (PARTITION BY stock_code ORDER BY stock_date ROWS BETWEEN 2 PRECEDING AND 1 PRECEDING) as avg_volume_3days,
+                       CASE WHEN price_close = price_high THEN 1 ELSE 0 END as is_ceiling
+                FROM last_3_filtered
+            ),
+            price_compare AS (
+                SELECT stock_code,
+                       MAX(price_close) as max_price_close_2days
+                FROM last_3_ordered
+                WHERE seq < 3
+                GROUP BY stock_code
+            ),
+            vsa_volume_check AS (
+                SELECT l.stock_code,
+                       COUNT(*) as total_records,
+                       MAX(l.stock_date) as latest_date,
+                       MIN(l.stock_date) as earliest_date,
+                       SUM(CASE WHEN l.seq = 3 
+                                AND l.is_ceiling = 1 
+                                AND l.price_close > COALESCE(p.max_price_close_2days, 0)
+                                AND l.volume >= COALESCE(l.avg_volume_3days, 0) * 2
+                           THEN 1 ELSE 0 END) as vsa_volume_count
+                FROM last_3_ordered l
+                LEFT JOIN price_compare p ON l.stock_code = p.stock_code
+                GROUP BY l.stock_code
+            )
+            SELECT stock_code
+            FROM vsa_volume_check
+            WHERE total_records = 3
+              AND vsa_volume_count = 1
+              AND latest_date >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)
+              AND DATEDIFF(latest_date, earliest_date) <= 2
+        ";
+        $stocks = DB::connection('mysql')->select($query);
+        $data['stocks'] = $stocks;
+        return view('admin.stock_vsa_volume_1vs3d.list', $data);
+    }
+
+    public function getStockDataVsaVolume($stock_code){
+        try {
+            // Get data for last 180 days by default
+            // stock_date is stored as YYYYMMDD format (text), so we need to convert it
+            $data = DB::connection('mysql')->table('stock')
+                ->where('stock_code', $stock_code)
+                ->whereRaw("STR_TO_DATE(stock_date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 180 DAY)")
+                ->orderBy('stock_date')
+                ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
+            return response()->json($data)
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

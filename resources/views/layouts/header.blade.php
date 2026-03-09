@@ -238,6 +238,12 @@
                   <p>CP tăng cao 2d</p>
                 </a>
               </li>
+              <li class="nav-item">
+                <a href="{{ url('admin/stock_vsa_volume_1vs3d/list') }}" class="nav-link">
+                  <i class="fa fa-address-card nav-icon"></i>
+                  <p>CP tăng vsa 1vs3d</p>
+                </a>
+              </li>
             </ul>
           </li>
           <!-- Giao dịch thử nghiệm -->

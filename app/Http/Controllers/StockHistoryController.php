@@ -137,6 +137,52 @@ class StockHistoryController extends Controller
         return view('admin.stock_ceiling_2days.list', $data);
     }
 
+    public function getCeilingStocks3Days(){
+        $query = "
+            WITH last_3_each_stock AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume,
+                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date DESC) as rn
+                FROM si.stock
+                WHERE LENGTH(stock_code) = 3
+            ),
+            last_3_filtered AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume
+                FROM last_3_each_stock
+                WHERE rn <= 3
+            ),
+            last_3_ordered AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume,
+                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date) as seq,
+                       LAG(stock_date) OVER (PARTITION BY stock_code ORDER BY stock_date) as prev_date,
+                       LAG(price_close) OVER (PARTITION BY stock_code ORDER BY stock_date) as prev_close,
+                       CASE WHEN price_close = price_high THEN 1 ELSE 0 END as is_ceiling
+                FROM last_3_filtered
+            ),
+            ceiling_check AS (
+                SELECT stock_code,
+                       COUNT(*) as total_records,
+                       SUM(is_ceiling) as ceiling_count,
+                       SUM(CASE WHEN seq > 1 AND price_close > prev_close THEN 1 ELSE 0 END) as increase_count,
+                       SUM(CASE WHEN volume > 1000 THEN 1 ELSE 0 END) as vol_count,
+                       MAX(stock_date) as latest_date,
+                       MIN(stock_date) as earliest_date
+                FROM last_3_ordered
+                GROUP BY stock_code
+            )
+            SELECT stock_code
+            FROM ceiling_check
+            WHERE total_records = 3
+              AND ceiling_count = 3
+              AND increase_count = 2
+              AND vol_count = 3
+              AND latest_date >= DATE_SUB(CURDATE(), INTERVAL 4 DAY)
+              AND DATEDIFF(latest_date, earliest_date) <= 2
+        ";
+        $stocks = DB::connection('mysql')->select($query);
+        $data['stocks'] = $stocks;
+        return view('admin.stock_ceiling_3days.list', $data);
+    }
+
     public function getStockData2Days($stock_code){
         try {
             // Get data for last 180 days by default
@@ -196,6 +242,67 @@ class StockHistoryController extends Controller
         $stocks = DB::connection('mysql')->select($query);
         $data['stocks'] = $stocks;
         return view('admin.stock_highest_2days.list', $data);
+    }
+
+    public function getHighestStocks3Days(){
+        $query = "
+            WITH last_3_each_stock AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume,
+                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date DESC) as rn
+                FROM si.stock
+                WHERE LENGTH(stock_code) = 3
+            ),
+            last_3_filtered AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume
+                FROM last_3_each_stock
+                WHERE rn <= 3
+            ),
+            last_3_ordered AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume,
+                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date) as seq,
+                       LAG(stock_date) OVER (PARTITION BY stock_code ORDER BY stock_date) as prev_date,
+                       LAG(price_close) OVER (PARTITION BY stock_code ORDER BY stock_date) as prev_close
+                FROM last_3_filtered
+            ),
+            increase_check AS (
+                SELECT stock_code,
+                       COUNT(*) as total_records,
+                       SUM(CASE WHEN seq > 1 AND price_close > prev_close THEN 1 ELSE 0 END) as increase_count,
+                       SUM(CASE WHEN volume > 1000 THEN 1 ELSE 0 END) as vol_count,
+                       MAX(stock_date) as latest_date,
+                       MIN(stock_date) as earliest_date
+                FROM last_3_ordered
+                GROUP BY stock_code
+            )
+            SELECT stock_code
+            FROM increase_check
+            WHERE total_records = 3
+              AND increase_count = 2
+              AND vol_count = 3
+              AND latest_date >= DATE_SUB(CURDATE(), INTERVAL 4 DAY)
+              AND DATEDIFF(latest_date, earliest_date) <= 2
+        ";
+        $stocks = DB::connection('mysql')->select($query);
+        $data['stocks'] = $stocks;
+        return view('admin.stock_highest_3days.list', $data);
+    }
+
+    public function getStockData3Days($stock_code){
+        try {
+            // Get data for last 180 days by default
+            // stock_date is stored as YYYYMMDD format (text), so we need to convert it
+            $data = DB::connection('mysql')->table('stock')
+                ->where('stock_code', $stock_code)
+                ->whereRaw("STR_TO_DATE(stock_date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 180 DAY)")
+                ->orderBy('stock_date')
+                ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
+            return response()->json($data)
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function getCeilingStocks1Day(){

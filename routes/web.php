@@ -60,6 +60,10 @@ Route::get('admin/stock_ceiling_2days/data/{stock_code}', [StockHistoryControlle
 Route::get('admin/stock_ceiling_3days/list', [StockHistoryController::class, 'getCeilingStocks3Days']);
 Route::get('admin/stock_ceiling_3days/data/{stock_code}', [StockHistoryController::class, 'getStockData2Days']);
 
+// CP tích lũy 3M
+Route::get('admin/stock_accumulate_3months/list', [StockHistoryController::class, 'getAccumulateStocks3Months']);
+Route::get('admin/stock_accumulate_3months/data/{stock_code}', [StockHistoryController::class, 'getStockData3Months']);
+
 // Mã tăng trần 1 ngày mới nhất trong 2 ngày gần nhất
 Route::get('admin/stock_ceiling_1day/list', [StockHistoryController::class, 'getCeilingStocks1Day']);
 Route::get('admin/stock_ceiling_1day/data/{stock_code}', [StockHistoryController::class, 'getStockData1Day']);

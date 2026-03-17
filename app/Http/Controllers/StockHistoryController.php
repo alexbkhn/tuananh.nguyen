@@ -130,7 +130,6 @@ class StockHistoryController extends Controller
               AND increase_count = 1
               AND vol_count = 2
               AND latest_date >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)
-              AND DATEDIFF(latest_date, earliest_date) <= 1
         ";
         $stocks = DB::connection('mysql')->select($query);
         $data['stocks'] = $stocks;
@@ -176,7 +175,6 @@ class StockHistoryController extends Controller
               AND increase_count = 2
               AND vol_count = 3
               AND latest_date >= DATE_SUB(CURDATE(), INTERVAL 4 DAY)
-              AND DATEDIFF(latest_date, earliest_date) <= 2
         ";
         $stocks = DB::connection('mysql')->select($query);
         $data['stocks'] = $stocks;
@@ -237,7 +235,6 @@ class StockHistoryController extends Controller
               AND increase_count = 1
               AND vol_count = 2
               AND latest_date >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)
-              AND DATEDIFF(latest_date, earliest_date) <= 1
         ";
         $stocks = DB::connection('mysql')->select($query);
         $data['stocks'] = $stocks;
@@ -280,7 +277,6 @@ class StockHistoryController extends Controller
               AND increase_count = 2
               AND vol_count = 3
               AND latest_date >= DATE_SUB(CURDATE(), INTERVAL 4 DAY)
-              AND DATEDIFF(latest_date, earliest_date) <= 2
         ";
         $stocks = DB::connection('mysql')->select($query);
         $data['stocks'] = $stocks;
@@ -346,7 +342,6 @@ class StockHistoryController extends Controller
             WHERE total_records = 2
               AND ceiling_1day_count = 1
               AND latest_date >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)
-              AND DATEDIFF(latest_date, earliest_date) <= 1
         ";
         $stocks = DB::connection('mysql')->select($query);
         $data['stocks'] = $stocks;
@@ -417,7 +412,6 @@ class StockHistoryController extends Controller
             WHERE total_records = 3
               AND vsa_volume_count = 1
               AND latest_date >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)
-              AND DATEDIFF(latest_date, earliest_date) <= 2
         ";
         $stocks = DB::connection('mysql')->select($query);
         $data['stocks'] = $stocks;
@@ -431,6 +425,38 @@ class StockHistoryController extends Controller
             $data = DB::connection('mysql')->table('stock')
                 ->where('stock_code', $stock_code)
                 ->whereRaw("STR_TO_DATE(stock_date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 180 DAY)")
+                ->orderBy('stock_date')
+                ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
+            return response()->json($data)
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getAccumulateStocks3Months(){
+        $query = "
+            SELECT stock_code
+            FROM si.stock
+            WHERE LENGTH(stock_code) = 3
+              AND STR_TO_DATE(stock_date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+            GROUP BY stock_code
+            HAVING (MAX(price_high) - MIN(price_low)) / MAX(price_high) <= 0.1
+              AND COUNT(*) >= 30  -- Ensure at least 30 trading days
+        ";
+        $stocks = DB::connection('mysql')->select($query);
+        $data['stocks'] = $stocks;
+        return view('admin.stock_accumulate_3months.list', $data);
+    }
+
+    public function getStockData3Months($stock_code){
+        try {
+            // Get data for last 3 months
+            $data = DB::connection('mysql')->table('stock')
+                ->where('stock_code', $stock_code)
+                ->whereRaw("STR_TO_DATE(stock_date, '%Y%m%d') >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)")
                 ->orderBy('stock_date')
                 ->get(['stock_date', 'price_open', 'price_high', 'price_low', 'price_close', 'volume']);
             return response()->json($data)

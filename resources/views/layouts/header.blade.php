@@ -256,6 +256,12 @@
                   <p>CP tăng vsa 1vs3d</p>
                 </a>
               </li>
+              <li class="nav-item">
+                <a href="{{ url('admin/stock_accumulate_3months/list') }}" class="nav-link">
+                  <i class="fa fa-address-card nav-icon"></i>
+                  <p>CP tích lũy 3M</p>
+                </a>
+              </li>
             </ul>
           </li>
           <!-- Giao dịch thử nghiệm -->

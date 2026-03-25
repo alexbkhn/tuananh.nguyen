@@ -80,6 +80,10 @@ Route::get('admin/stock_highest_3days/data/{stock_code}', [StockHistoryControlle
 Route::get('admin/stock_vsa_volume_1vs3d/list', [StockHistoryController::class, 'getVsaVolume1vs3d']);
 Route::get('admin/stock_vsa_volume_1vs3d/data/{stock_code}', [StockHistoryController::class, 'getStockDataVsaVolume']);
 
+// CP tăng giá nền (price_high hiện tại > trung bình price_high của 5 phiên trước)
+Route::get('admin/stock_base_high_increase/list', [StockHistoryController::class, 'getBaseHighIncreaseStocks']);
+Route::get('admin/stock_base_high_increase/data/{stock_code}', [StockHistoryController::class, 'getStockData2Days']);
+
 // Lịch sử vốn
 Route::get('admin/nav_history/list', [NavHistoryController::class, 'getNavHistory']);
 Route::post('admin/nav_history/list', [NavHistoryController::class, 'insert']);

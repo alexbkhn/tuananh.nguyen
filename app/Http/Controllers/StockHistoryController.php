@@ -467,4 +467,43 @@ class StockHistoryController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function getBaseHighIncreaseStocks(){
+        $query = "
+            WITH last_6_each_stock AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume,
+                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date DESC) as rn
+                FROM si.stock
+                WHERE LENGTH(stock_code) = 3
+            ),
+            last_6_filtered AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume
+                FROM last_6_each_stock
+                WHERE rn <= 6
+            ),
+            last_6_ordered AS (
+                SELECT stock_code, stock_date, price_close, price_high, price_open, price_low, volume,
+                       ROW_NUMBER() OVER (PARTITION BY stock_code ORDER BY stock_date DESC) as seq,
+                       AVG(price_high) OVER (PARTITION BY stock_code ORDER BY stock_date DESC ROWS BETWEEN 1 FOLLOWING AND 5 FOLLOWING) as avg_price_high_5days
+                FROM last_6_filtered
+            ),
+            base_high_increase_check AS (
+                SELECT stock_code,
+                       MAX(CASE WHEN seq = 1 THEN price_high ELSE NULL END) as latest_price_high,
+                       MAX(CASE WHEN seq = 1 THEN avg_price_high_5days ELSE NULL END) as avg_price_high_5days,
+                       MAX(stock_date) as latest_date,
+                       COUNT(*) as total_records
+                FROM last_6_ordered
+                GROUP BY stock_code
+            )
+            SELECT stock_code, latest_price_high, avg_price_high_5days
+            FROM base_high_increase_check
+            WHERE total_records = 6
+              AND latest_price_high > avg_price_high_5days
+              AND latest_date >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)
+        ";
+        $stocks = DB::connection('mysql')->select($query);
+        $data['stocks'] = $stocks;
+        return view('admin.stock_base_high_increase.list', $data);
+    }
 }

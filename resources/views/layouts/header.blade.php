@@ -257,6 +257,12 @@
                 </a>
               </li>
               <li class="nav-item">
+                <a href="{{ url('admin/stock_base_high_increase/list') }}" class="nav-link">
+                  <i class="fa fa-address-card nav-icon"></i>
+                  <p>CP tăng giá nền</p>
+                </a>
+              </li>
+              <li class="nav-item">
                 <a href="{{ url('admin/stock_accumulate_3months/list') }}" class="nav-link">
                   <i class="fa fa-address-card nav-icon"></i>
                   <p>CP tích lũy 3M</p>
